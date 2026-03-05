@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+<meta charset="UTF-8">
+<title>Registro de Profesores</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Registro de Profesores</h1>
+
+<form id="formProfesor">
+
+<div class="grid">
+
+<div class="campo">
+<label>Tipo Documento</label>
+<select id="tipoDocumento" required>
+<option value="">Seleccione</option>
+<option value="CC">C.C</option>
+<option value="CE">C.E</option>
+<option value="TI">T.I</option>
+<option value="NIUP">NIUP</option>
+</select>
+</div>
+
+<div class="campo">
+<label>Número Documento</label>
+<input type="number" id="numeroDocumento" required>
+</div>
+
+<div class="campo">
+<label>Nombre</label>
+<input type="text" id="nombre" required>
+</div>
+
+<div class="campo">
+<label>Apellido</label>
+<input type="text" id="apellido" required>
+</div>
+
+<div class="campo">
+<label>Fecha Nacimiento</label>
+<input type="date" id="fecha" required>
+</div>
+
+<div class="campo">
+<label>Nivel de Estudios</label>
+<select id="nivel" required>
+<option value="">Seleccione</option>
+<option>Pregrado</option>
+<option>Maestría</option>
+<option>Doctorado</option>
+</select>
+</div>
+
+<div class="campo">
+<label>Asignatura</label>
+
+<select id="asignatura" onchange="verificarAsignatura()" required>
+<option value="">Seleccione</option>
+<option>Matemáticas</option>
+<option>Ciencias</option>
+<option>Sistemas</option>
+<option value="Otro">Otro</option>
+</select>
+
+<input type="text" id="otraAsignatura" placeholder="Escriba la asignatura" style="display:none">
+
+</div>
+
+<div class="campo">
+<label>Grado</label>
+<select id="grado">
+<option>Primer Semestre</option>
+<option>Segundo Semestre</option>
+<option>Tercer Semestre</option>
+<option>Cuarto Semestre</option>
+</select>
+</div>
+
+<div class="campo">
+<label>EPS</label>
+<input type="text" id="eps" required>
+</div>
+
+<div class="campo">
+<label>Salario</label>
+<input type="number" id="salario" required>
+</div>
+
+</div>
+
+<div class="botones">
+
+<button type="submit" class="btnGuardar">
+Guardar Profesor
+</button>
+
+<a href="profesores.html" class="btnTabla">
+Ver Profesores
+</a>
+
+</div>
+
+</form>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

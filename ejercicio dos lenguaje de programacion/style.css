@@ -1,0 +1,104 @@
+body{
+font-family: Arial;
+background: linear-gradient(135deg,#667eea,#764ba2);
+margin:0;
+}
+
+.container{
+width:80%;
+margin:auto;
+margin-top:40px;
+background:white;
+padding:30px;
+border-radius:12px;
+box-shadow:0 10px 25px rgba(0,0,0,0.3);
+}
+
+h1{
+text-align:center;
+margin-bottom:30px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:20px;
+}
+
+.campo{
+display:flex;
+flex-direction:column;
+}
+
+label{
+font-weight:bold;
+margin-bottom:5px;
+}
+
+input,select{
+padding:10px;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+.botones{
+margin-top:30px;
+display:flex;
+justify-content:center;
+gap:20px;
+}
+
+button{
+padding:12px 20px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+}
+
+.btnGuardar{
+background:#28a745;
+color:white;
+}
+
+.btnTabla{
+background:#007bff;
+color:white;
+text-decoration:none;
+padding:12px 20px;
+border-radius:8px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:30px;
+}
+
+th,td{
+padding:12px;
+text-align:center;
+border-bottom:1px solid #ddd;
+}
+
+th{
+background:#007bff;
+color:white;
+}
+
+.btnEliminar{
+background:red;
+color:white;
+border:none;
+padding:6px 10px;
+border-radius:5px;
+cursor:pointer;
+}
+
+.btnEditar{
+background:orange;
+color:white;
+border:none;
+padding:6px 10px;
+border-radius:5px;
+cursor:pointer;
+}
