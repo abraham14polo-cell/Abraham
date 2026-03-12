@@ -1,12 +1,11 @@
 let profesores = JSON.parse(localStorage.getItem("profesores")) || []
 
 let form = document.getElementById("formProfesor")
-
 let editIndex = localStorage.getItem("editIndex")
 
 if(form){
 
-if(editIndex !== null){
+if(editIndex !== null && profesores[editIndex]){
 
 let datos = profesores[editIndex]
 
@@ -40,20 +39,15 @@ let eps = document.getElementById("eps").value
 let salario = document.getElementById("salario").value
 
 if(!tipo || !numero || !nombre || !apellido || !fecha || !nivel || !eps || !salario){
-
 alert("Complete todos los campos")
 return
-
 }
 
 if(asignatura === "Otro"){
-
 asignatura = otraAsignatura
-
 }
 
 let profesor = {
-
 tipo,
 numero,
 nombre,
@@ -64,18 +58,13 @@ asignatura,
 grado,
 eps,
 salario
-
 }
 
 if(editIndex !== null){
-
 profesores[editIndex] = profesor
 localStorage.removeItem("editIndex")
-
 }else{
-
 profesores.push(profesor)
-
 }
 
 localStorage.setItem("profesores",JSON.stringify(profesores))
@@ -92,14 +81,10 @@ let asignatura = document.getElementById("asignatura").value
 let otra = document.getElementById("otraAsignatura")
 
 if(asignatura === "Otro"){
-
 otra.style.display="block"
-
 }else{
-
 otra.style.display="none"
 otra.value=""
-
 }
 
 }
@@ -107,9 +92,7 @@ otra.value=""
 let tabla = document.getElementById("tablaProfesores")
 
 if(tabla){
-
 mostrarProfesores()
-
 }
 
 function mostrarProfesores(){
@@ -121,8 +104,7 @@ tabla.innerHTML=""
 datos.forEach((p,i)=>{
 
 tabla.innerHTML += `
-
-<tr>
+<tr style="animation:filaEntrada 0.5s ease ${i*0.1}s both">
 
 <td>${p.tipo} ${p.numero}</td>
 <td>${p.nombre}</td>
@@ -133,21 +115,24 @@ tabla.innerHTML += `
 
 <td>
 
-<button class="btnEditar" onclick="editar(${i})">Editar</button>
+<button class="btnEditar" onclick="editar(${i})">✏️</button>
 
-<button class="btnEliminar" onclick="eliminar(${i})">Eliminar</button>
+<button class="btnEliminar" onclick="eliminar(${i},event)">🗑</button>
 
 </td>
 
 </tr>
-
 `
 
 })
 
 }
 
-function eliminar(i){
+function eliminar(i,event){
+
+crearBurbujas(event.clientX,event.clientY)
+
+setTimeout(()=>{
 
 let datos = JSON.parse(localStorage.getItem("profesores"))
 
@@ -157,6 +142,8 @@ localStorage.setItem("profesores",JSON.stringify(datos))
 
 mostrarProfesores()
 
+},300)
+
 }
 
 function editar(i){
@@ -164,5 +151,32 @@ function editar(i){
 localStorage.setItem("editIndex",i)
 
 window.location.href="index.html"
+
+}
+
+function crearBurbujas(x,y){
+
+for(let i=0;i<10;i++){
+
+let b=document.createElement("span")
+
+b.classList.add("burbuja")
+
+let randomX=(Math.random()-0.5)*200+"px"
+let randomY=(Math.random()-0.5)*200+"px"
+
+b.style.setProperty("--x",randomX)
+b.style.setProperty("--y",randomY)
+
+b.style.left=x+"px"
+b.style.top=y+"px"
+
+document.body.appendChild(b)
+
+setTimeout(()=>{
+b.remove()
+},800)
+
+}
 
 }

@@ -1,23 +1,108 @@
-body{
-font-family: Arial;
-background: linear-gradient(135deg,#667eea,#764ba2);
+*{
 margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
 }
 
-.container{
-width:80%;
-margin:auto;
-margin-top:40px;
-background:white;
-padding:30px;
-border-radius:12px;
-box-shadow:0 10px 25px rgba(0,0,0,0.3);
+/* ANIMACION ENTRADA PAGINA */
+
+body{
+min-height:100vh;
+
+background:linear-gradient(135deg,#667eea,#764ba2,#6dd5ed,#2193b0);
+background-size:400% 400%;
+
+animation:fondo 15s ease infinite,entradaPagina 1s ease;
+
+display:flex;
+justify-content:center;
+align-items:flex-start;
+
+padding:40px;
+overflow-x:hidden;
 }
+
+@keyframes fondo{
+0%{background-position:0% 50%;}
+50%{background-position:100% 50%;}
+100%{background-position:0% 50%;}
+}
+
+@keyframes entradaPagina{
+from{
+opacity:0;
+transform:translateY(40px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+/* CONTENEDOR */
+
+.container{
+width:90%;
+max-width:1000px;
+
+background:rgba(255,255,255,0.85);
+
+backdrop-filter:blur(15px);
+-webkit-backdrop-filter:blur(15px);
+
+padding:40px;
+
+border-radius:18px;
+
+border:1px solid rgba(255,255,255,0.3);
+
+box-shadow:
+0 25px 60px rgba(0,0,0,0.35),
+inset 0 1px 0 rgba(255,255,255,0.6);
+
+animation:aparecer 0.8s ease;
+
+transition:transform .3s;
+}
+
+.container:hover{
+transform:translateY(-3px);
+}
+
+@keyframes aparecer{
+from{
+opacity:0;
+transform:translateY(30px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+/* TITULO */
 
 h1{
 text-align:center;
 margin-bottom:30px;
+color:#333;
+letter-spacing:2px;
+animation:tituloEntrada 1.2s ease;
 }
+
+@keyframes tituloEntrada{
+from{
+opacity:0;
+transform:scale(0.6);
+}
+to{
+opacity:1;
+transform:scale(1);
+}
+}
+
+/* GRID FORM */
 
 .grid{
 display:grid;
@@ -28,77 +113,268 @@ gap:20px;
 .campo{
 display:flex;
 flex-direction:column;
+animation:campoEntrada 0.8s ease;
+}
+
+@keyframes campoEntrada{
+from{
+opacity:0;
+transform:translateX(-20px);
+}
+to{
+opacity:1;
+transform:translateX(0);
+}
 }
 
 label{
 font-weight:bold;
-margin-bottom:5px;
+margin-bottom:6px;
+color:#444;
 }
 
+/* INPUTS */
+
 input,select{
-padding:10px;
+padding:12px;
 border-radius:8px;
 border:1px solid #ccc;
+transition:all .3s;
+font-size:14px;
+background:#fafafa;
 }
+
+input:hover,select:hover{
+border-color:#667eea;
+}
+
+input:focus,select:focus{
+outline:none;
+border-color:#667eea;
+box-shadow:0 0 8px rgba(102,126,234,0.6);
+background:white;
+transform:scale(1.02);
+}
+
+/* BOTONES */
 
 .botones{
 margin-top:30px;
 display:flex;
 justify-content:center;
 gap:20px;
+flex-wrap:wrap;
 }
 
 button{
-padding:12px 20px;
+padding:12px 22px;
 border:none;
 border-radius:8px;
 cursor:pointer;
+font-weight:bold;
+transition:all .3s;
+letter-spacing:.5px;
+}
+
+button:hover{
+transform:scale(1.05);
+box-shadow:0 10px 20px rgba(0,0,0,0.25);
 }
 
 .btnGuardar{
-background:#28a745;
+background:linear-gradient(135deg,#28a745,#218838);
 color:white;
 }
 
+.btnGuardar:hover{
+background:linear-gradient(135deg,#34d058,#28a745);
+}
+
 .btnTabla{
-background:#007bff;
+background:linear-gradient(135deg,#007bff,#0056b3);
 color:white;
 text-decoration:none;
-padding:12px 20px;
+padding:12px 22px;
 border-radius:8px;
+font-weight:bold;
+transition:.3s;
 }
+
+.btnTabla:hover{
+transform:scale(1.05);
+box-shadow:0 10px 20px rgba(0,0,0,0.25);
+}
+
+/* TABLA */
 
 table{
 width:100%;
 border-collapse:collapse;
 margin-top:30px;
+overflow:hidden;
+border-radius:10px;
+animation:tablaEntrada 1s ease;
+}
+
+@keyframes tablaEntrada{
+from{
+opacity:0;
+transform:translateY(20px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+thead{
+background:linear-gradient(135deg,#007bff,#0056b3);
+color:white;
 }
 
 th,td{
-padding:12px;
+padding:14px;
 text-align:center;
-border-bottom:1px solid #ddd;
 }
 
-th{
-background:#007bff;
-color:white;
+tbody tr{
+border-bottom:1px solid #ddd;
+transition:all .3s;
 }
+
+tbody tr:hover{
+background:#eef2ff;
+transform:scale(1.01);
+box-shadow:0 5px 10px rgba(0,0,0,0.1);
+}
+
+/* BOTONES TABLA */
 
 .btnEliminar{
-background:red;
+background:#e74c3c;
 color:white;
 border:none;
-padding:6px 10px;
-border-radius:5px;
+padding:6px 12px;
+border-radius:6px;
 cursor:pointer;
+transition:.3s;
+}
+
+.btnEliminar:hover{
+background:#c0392b;
+transform:scale(1.1);
 }
 
 .btnEditar{
-background:orange;
+background:#f39c12;
 color:white;
 border:none;
-padding:6px 10px;
-border-radius:5px;
+padding:6px 12px;
+border-radius:6px;
 cursor:pointer;
+transition:.3s;
+}
+
+.btnEditar:hover{
+background:#d68910;
+transform:scale(1.1);
+}
+
+/* RESPONSIVE */
+
+@media(max-width:768px){
+
+.grid{
+grid-template-columns:1fr;
+}
+
+.container{
+padding:25px;
+}
+
+h1{
+font-size:22px;
+}
+.burbuja{
+position:absolute;
+width:10px;
+height:10px;
+background:#e74c3c;
+border-radius:50%;
+pointer-events:none;
+animation:burbujaAnim 0.8s ease-out forwards;
+}
+
+@keyframes burbujaAnim{
+0%{
+transform:translate(0,0) scale(1);
+opacity:1;
+}
+
+100%{
+transform:translate(var(--x),var(--y)) scale(0);
+opacity:0;
+}
+}
+.notificacion{
+position:fixed;
+top:20px;
+right:20px;
+background:#28a745;
+color:white;
+padding:15px 25px;
+border-radius:8px;
+box-shadow:0 5px 20px rgba(0,0,0,0.3);
+animation:noti 0.5s ease,desaparecer 3s forwards;
+}
+
+@keyframes noti{
+from{
+transform:translateX(200px);
+opacity:0;
+}
+to{
+transform:translateX(0);
+opacity:1;
+}
+}
+
+@keyframes desaparecer{
+80%{opacity:1;}
+100%{
+opacity:0;
+transform:translateX(200px);
+}
+}
+@keyframes filaEntrada{
+
+from{
+opacity:0;
+transform:translateY(20px) scale(0.95);
+}
+
+to{
+opacity:1;
+transform:translateY(0) scale(1);
+}
+
+}
+.eliminando{
+animation:eliminarFila 0.4s forwards;
+}
+
+@keyframes eliminarFila{
+to{
+opacity:0;
+transform:translateX(100px);
+}
+}
+.campo{
+position:relative;
+}
+
+input,select{
+background:#f9f9ff;
+}
+
 }
