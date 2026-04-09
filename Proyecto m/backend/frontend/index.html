@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Sistema Inmobiliaria</title>
+
+<style>
+body{
+    margin:0;
+    font-family: Arial;
+    background:#f4f6f8;
+}
+header{
+    background:#1f2a44;
+    color:white;
+    padding:15px;
+}
+.container{
+    display:flex;
+}
+menu{
+    width:220px;
+    background:#26344f;
+    min-height:100vh;
+}
+menu button{
+    width:100%;
+    padding:15px;
+    border:none;
+    background:none;
+    color:white;
+    text-align:left;
+    cursor:pointer;
+}
+menu button:hover{
+    background:#1f2a44;
+}
+main{
+    flex:1;
+    padding:20px;
+}
+table{
+    width:100%;
+    background:white;
+    border-collapse:collapse;
+}
+th,td{
+    padding:10px;
+    border-bottom:1px solid #ddd;
+}
+input,select{
+    padding:8px;
+    margin:5px;
+}
+button.action{
+    padding:5px 10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>Sistema Inmobiliaria</header>
+
+<div class="container">
+
+<menu>
+<button onclick="mostrarPersonas()">Persona</button>
+<button onclick="mostrarTipos()">Tipo Persona</button>
+</menu>
+
+<main id="contenido">
+<h2>Bienvenido</h2>
+</main>
+
+</div>
+
+<script>
+
+const API = "http://localhost:3000/api";
+
+//////////////// PERSONAS
+
+function mostrarPersonas(){
+document.getElementById("contenido").innerHTML=`
+<h2>Personas</h2>
+
+<input id="buscar" placeholder="Buscar">
+<button onclick="cargarPersonas()">Buscar</button>
+
+<br><br>
+
+<input id="nombre" placeholder="Nombre">
+<input id="apellido" placeholder="Apellido">
+<select id="tipo"></select>
+
+<button id="btnGuardar" onclick="guardarPersona()">Guardar</button>
+
+<br><br>
+
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Nombre</th>
+<th>Apellido</th>
+<th>Tipo</th>
+<th>Acciones</th>
+</tr>
+</thead>
+<tbody id="tablaPersonas"></tbody>
+</table>
+`;
+
+cargarTiposSelect();
+cargarPersonas();
+}
+
+function cargarPersonas(){
+let buscar=document.getElementById("buscar")?.value || "";
+
+fetch(API+"/personas?buscar="+buscar)
+.then(r=>r.json())
+.then(data=>{
+let html="";
+
+data.forEach(p=>{
+html+=`
+<tr>
+<td>${p.idPersona}</td>
+<td>${p.nombre}</td>
+<td>${p.apellido}</td>
+<td>${p.descripcion}</td>
+<td>
+<button class="action" onclick="editarPersona(${p.idPersona},'${p.nombre}','${p.apellido}',${p.idTipoPersona})">Editar</button>
+<button class="action" onclick="eliminarPersona(${p.idPersona})">Eliminar</button>
+</td>
+</tr>
+`;
+});
+
+document.getElementById("tablaPersonas").innerHTML=html;
+});
+}
+
+function guardarPersona(){
+fetch(API+"/personas",{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+nombre:document.getElementById("nombre").value,
+apellido:document.getElementById("apellido").value,
+idTipoPersona:document.getElementById("tipo").value
+})
+}).then(()=>{
+limpiarPersona();
+cargarPersonas();
+});
+}
+
+function editarPersona(id,nombre,apellido,tipo){
+document.getElementById("nombre").value=nombre;
+document.getElementById("apellido").value=apellido;
+document.getElementById("tipo").value=tipo;
+
+const btn = document.getElementById("btnGuardar");
+btn.textContent="Actualizar";
+
+btn.onclick=function(){
+fetch(API+"/personas/"+id,{
+method:"PUT",
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+nombre:document.getElementById("nombre").value,
+apellido:document.getElementById("apellido").value,
+idTipoPersona:document.getElementById("tipo").value
+})
+}).then(()=>{
+mostrarPersonas();
+});
+};
+}
+
+function eliminarPersona(id){
+if(confirm("Eliminar?")){
+fetch(API+"/personas/"+id,{method:"DELETE"})
+.then(()=>cargarPersonas());
+}
+}
+
+function limpiarPersona(){
+document.getElementById("nombre").value="";
+document.getElementById("apellido").value="";
+}
+
+function cargarTiposSelect(){
+fetch(API+"/tipos")
+.then(r=>r.json())
+.then(data=>{
+let html="";
+data.forEach(t=>{
+html+=`<option value="${t.idTipoPersona}">${t.descripcion}</option>`;
+});
+document.getElementById("tipo").innerHTML=html;
+});
+}
+
+//////////////// TIPOS
+
+function mostrarTipos(){
+document.getElementById("contenido").innerHTML=`
+
+<h2>Tipo Persona</h2>
+
+<input id="descripcion" placeholder="Descripcion">
+<button onclick="guardarTipo()">Guardar</button>
+
+<br><br>
+
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Descripcion</th>
+<th>Acciones</th>
+</tr>
+</thead>
+<tbody id="tablaTipos"></tbody>
+</table>
+`;
+
+cargarTipos();
+}
+
+function cargarTipos(){
+fetch(API+"/tipos")
+.then(r=>r.json())
+.then(data=>{
+let html="";
+
+data.forEach(t=>{
+html+=`
+<tr>
+<td>${t.idTipoPersona}</td>
+<td>${t.descripcion}</td>
+<td>
+<button onclick="eliminarTipo(${t.idTipoPersona})">Eliminar</button>
+</td>
+</tr>
+`;
+});
+
+document.getElementById("tablaTipos").innerHTML=html;
+});
+}
+
+function guardarTipo(){
+fetch(API+"/tipos",{
+method:"POST",
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+descripcion:document.getElementById("descripcion").value
+})
+}).then(()=>{
+document.getElementById("descripcion").value="";
+cargarTipos();
+});
+}
+
+function eliminarTipo(id){
+if(confirm("Eliminar?")){
+fetch(API+"/tipos/"+id,{method:"DELETE"})
+.then(()=>cargarTipos());
+}
+}
+
+</script>
+
+</body>
+</html>
