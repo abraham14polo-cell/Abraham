@@ -2,7 +2,6 @@ const model = require('../models/clienteModel');
 
 exports.listar = (req, res) => {
     const buscar = req.query.buscar || "";
-
     model.getAll(buscar, (err, data) => {
         if (err) return res.status(500).json(err);
         res.json(data);

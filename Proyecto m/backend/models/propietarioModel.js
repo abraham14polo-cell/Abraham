@@ -2,7 +2,7 @@ const db = require('../config/db');
 
 exports.getAll = (buscar, callback) => {
     db.query(`
-        SELECT pr.idPropietario, p.idPersona, p.nombre, p.apellido
+        SELECT pr.idPropietario, p.idPersona, p.nombre, p.apellido, p.idTipoPersona
         FROM Propietario pr
         JOIN Persona p ON pr.idPersona = p.idPersona
         WHERE p.nombre LIKE ? OR p.apellido LIKE ?

@@ -2,60 +2,41 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Login - Inmobiliaria</title>
-
+<title>Login</title>
 <style>
 body{
-    margin:0;
-    font-family: "Segoe UI", Arial;
-    background:#0f172a;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
+background:#0f172a;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+font-family:Arial;
 }
 .card{
-    background:#1e293b;
-    padding:30px;
-    border-radius:12px;
-    width:320px;
-    box-shadow:0 10px 25px rgba(0,0,0,0.4);
-    color:white;
+background:#1e293b;
+padding:30px;
+border-radius:10px;
+color:white;
+width:300px;
 }
-input{
-    width:100%;
-    padding:10px;
-    margin-bottom:15px;
-    border:none;
-    border-radius:6px;
-    background:#334155;
-    color:white;
+input,button{
+width:100%;
+padding:10px;
+margin-top:10px;
+border:none;
+border-radius:5px;
 }
-button{
-    width:100%;
-    padding:10px;
-    border:none;
-    border-radius:6px;
-    background:#2563eb;
-    color:white;
-    cursor:pointer;
-}
-button:hover{background:#1d4ed8;}
-.error{color:#f87171;text-align:center;}
+button{background:#2563eb;color:white;}
 </style>
 </head>
-
 <body>
 
 <div class="card">
-<h2>Iniciar Sesión</h2>
-
+<h2>Login</h2>
 <input id="usuario" placeholder="Usuario">
-<input id="clave" type="password" placeholder="Contraseña">
-
+<input id="clave" type="password" placeholder="Clave">
 <button onclick="login()">Entrar</button>
-
-<div id="error" class="error"></div>
+<p id="error"></p>
 </div>
 
 <script>
@@ -71,11 +52,8 @@ clave:clave.value
 })
 .then(r=>r.json())
 .then(d=>{
-if(d.ok){
-window.location="index.html";
-}else{
-error.innerText="Credenciales incorrectas";
-}
+if(d.ok) location="index.html";
+else error.innerText="Error login";
 });
 }
 </script>

@@ -1,7 +1,11 @@
 const db = require('../config/db');
 
-exports.getAll = (callback) => {
-    db.query("SELECT * FROM TipoPersona", callback);
+exports.getAll = (buscar, callback) => {
+    db.query(
+        "SELECT * FROM TipoPersona WHERE descripcion LIKE ?",
+        [`%${buscar}%`],
+        callback
+    );
 };
 
 exports.create = (data, callback) => {

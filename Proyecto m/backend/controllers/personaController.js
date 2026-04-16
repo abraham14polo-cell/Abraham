@@ -2,7 +2,6 @@ const model = require('../models/personaModel');
 
 exports.listar = (req, res) => {
     const buscar = req.query.buscar || "";
-
     model.getAll(buscar, (err, data) => {
         if (err) return res.status(500).json(err);
         res.json(data);
@@ -12,7 +11,7 @@ exports.listar = (req, res) => {
 exports.insertar = (req, res) => {
     model.create(req.body, (err, id) => {
         if (err) return res.status(500).json(err);
-        res.json({ ok: true, idPersona: id }); // 👈 devuelve ID
+        res.json({ ok: true, idPersona: id });
     });
 };
 

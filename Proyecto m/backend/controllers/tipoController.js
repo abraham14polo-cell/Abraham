@@ -1,7 +1,8 @@
 const model = require('../models/tipoModel');
 
 exports.listar = (req, res) => {
-    model.getAll((err, data) => {
+    const buscar = req.query.buscar || "";
+    model.getAll(buscar, (err, data) => {
         if (err) return res.status(500).json(err);
         res.json(data);
     });

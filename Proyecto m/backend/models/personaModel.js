@@ -2,9 +2,15 @@ const db = require('../config/db');
 
 exports.getAll = (buscar, callback) => {
     db.query(`
-        SELECT p.*, t.descripcion
+        SELECT 
+            p.idPersona,
+            p.nombre,
+            p.apellido,
+            p.idTipoPersona,
+            t.descripcion AS tipo
         FROM Persona p
-        JOIN TipoPersona t ON p.idTipoPersona = t.idTipoPersona
+        INNER JOIN TipoPersona t 
+            ON p.idTipoPersona = t.idTipoPersona
         WHERE p.nombre LIKE ? OR p.apellido LIKE ?
     `, [`%${buscar}%`, `%${buscar}%`], callback);
 };
@@ -15,7 +21,7 @@ exports.create = (data, callback) => {
         [data.nombre, data.apellido, data.idTipoPersona],
         (err, result) => {
             if (err) return callback(err);
-            callback(null, result.insertId); // 👈 IMPORTANTE
+            callback(null, result.insertId);
         }
     );
 };
