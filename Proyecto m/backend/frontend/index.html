@@ -5,56 +5,17 @@
 <title>Sistema Inmobiliaria</title>
 
 <style>
-body{
-    margin:0;
-    font-family: Arial;
-    background:#f4f6f8;
-}
-header{
-    background:#1f2a44;
-    color:white;
-    padding:15px;
-}
-.container{
-    display:flex;
-}
-menu{
-    width:220px;
-    background:#26344f;
-    min-height:100vh;
-}
-menu button{
-    width:100%;
-    padding:15px;
-    border:none;
-    background:none;
-    color:white;
-    text-align:left;
-    cursor:pointer;
-}
-menu button:hover{
-    background:#1f2a44;
-}
-main{
-    flex:1;
-    padding:20px;
-}
-table{
-    width:100%;
-    background:white;
-    border-collapse:collapse;
-}
-th,td{
-    padding:10px;
-    border-bottom:1px solid #ddd;
-}
-input,select{
-    padding:8px;
-    margin:5px;
-}
-button.action{
-    padding:5px 10px;
-}
+body{margin:0;font-family:Arial;background:#f4f6f8;}
+header{background:#1f2a44;color:white;padding:15px;}
+.container{display:flex;}
+menu{width:220px;background:#26344f;min-height:100vh;}
+menu button{width:100%;padding:15px;border:none;background:none;color:white;text-align:left;cursor:pointer;}
+menu button:hover{background:#1f2a44;}
+main{flex:1;padding:20px;}
+table{width:100%;background:white;border-collapse:collapse;}
+th,td{padding:10px;border-bottom:1px solid #ddd;}
+input,select{padding:8px;margin:5px;}
+button.action{padding:5px 10px;}
 </style>
 </head>
 
@@ -65,213 +26,245 @@ button.action{
 <div class="container">
 
 <menu>
-<button onclick="mostrarPersonas()">Persona</button>
-<button onclick="mostrarTipos()">Tipo Persona</button>
+<button onclick="vista('tipos')">Tipo Persona</button>
+<button onclick="vista('personas')">Persona</button>
+<button onclick="vista('empleados')">Empleado</button>
+<button onclick="vista('clientes')">Cliente</button>
+<button onclick="vista('propietarios')">Propietario</button>
 </menu>
 
-<main id="contenido">
-<h2>Bienvenido</h2>
-</main>
+<main id="contenido"></main>
 
 </div>
 
 <script>
 
-const API = "http://localhost:3000/api";
+const API="/api";
+let editId=null;
 
-//////////////// PERSONAS
+function vista(tabla){
+editId=null;
 
-function mostrarPersonas(){
-document.getElementById("contenido").innerHTML=`
-<h2>Personas</h2>
+contenido.innerHTML=`
+<h2>${tabla.toUpperCase()}</h2>
 
 <input id="buscar" placeholder="Buscar">
-<button onclick="cargarPersonas()">Buscar</button>
+<button onclick="cargar('${tabla}')">Buscar</button>
 
-<br><br>
+<br>
 
-<input id="nombre" placeholder="Nombre">
-<input id="apellido" placeholder="Apellido">
-<select id="tipo"></select>
+<div id="form"></div>
 
-<button id="btnGuardar" onclick="guardarPersona()">Guardar</button>
-
-<br><br>
+<br>
 
 <table>
 <thead>
 <tr>
 <th>ID</th>
 <th>Nombre</th>
-<th>Apellido</th>
-<th>Tipo</th>
 <th>Acciones</th>
 </tr>
 </thead>
-<tbody id="tablaPersonas"></tbody>
+<tbody id="tablaDatos"></tbody>
 </table>
 `;
 
-cargarTiposSelect();
-cargarPersonas();
+if(tabla==="tipos"){
+form.innerHTML=`
+<input id="descripcion" placeholder="Descripción">
+<button onclick="guardar('${tabla}')">Guardar</button>
+`;
+}else{
+form.innerHTML=`
+<input id="nombre" placeholder="Nombre">
+<input id="apellido" placeholder="Apellido">
+<select id="tipo"></select>
+<button onclick="guardar('${tabla}')">Guardar</button>
+`;
+cargarTipos();
 }
 
-function cargarPersonas(){
-let buscar=document.getElementById("buscar")?.value || "";
+cargar(tabla);
+}
 
-fetch(API+"/personas?buscar="+buscar)
+function cargar(tabla){
+let b=document.getElementById("buscar")?.value || "";
+
+fetch(API+"/"+tabla+"?buscar="+b,{credentials:"include"})
 .then(r=>r.json())
 .then(data=>{
 let html="";
 
-data.forEach(p=>{
+data.forEach(x=>{
+let id = x.idTipoPersona || x.idPersona;
+
 html+=`
 <tr>
-<td>${p.idPersona}</td>
-<td>${p.nombre}</td>
-<td>${p.apellido}</td>
-<td>${p.descripcion}</td>
+<td>${id}</td>
+<td>${x.descripcion || (x.nombre+" "+x.apellido)}</td>
 <td>
-<button class="action" onclick="editarPersona(${p.idPersona},'${p.nombre}','${p.apellido}',${p.idTipoPersona})">Editar</button>
-<button class="action" onclick="eliminarPersona(${p.idPersona})">Eliminar</button>
+<button onclick='editar(${JSON.stringify(x)},"${tabla}")'>Editar</button>
+<button onclick='eliminar(${JSON.stringify(x)},"${tabla}")'>Eliminar</button>
 </td>
 </tr>
 `;
 });
 
-document.getElementById("tablaPersonas").innerHTML=html;
+tablaDatos.innerHTML=html;
 });
 }
 
-function guardarPersona(){
-fetch(API+"/personas",{
-method:"POST",
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({
-nombre:document.getElementById("nombre").value,
-apellido:document.getElementById("apellido").value,
-idTipoPersona:document.getElementById("tipo").value
-})
-}).then(()=>{
-limpiarPersona();
-cargarPersonas();
-});
+function guardar(tabla){
+
+if(tabla==="tipos"){
+
+    let data={descripcion:descripcion.value};
+
+    if(editId){
+        fetch(API+"/"+tabla+"/"+editId,{
+        method:"PUT",
+        credentials:"include",
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(data)
+        }).then(()=>{editId=null;vista(tabla);});
+    }else{
+        fetch(API+"/"+tabla,{
+        method:"POST",
+        credentials:"include",
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(data)
+        }).then(()=>vista(tabla));
+    }
+
+}else if(tabla==="personas"){
+
+    let data={
+        nombre:nombre.value,
+        apellido:apellido.value,
+        idTipoPersona:tipo.value
+    };
+
+    if(editId){
+        fetch(API+"/"+tabla+"/"+editId,{
+        method:"PUT",
+        credentials:"include",
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(data)
+        }).then(()=>{editId=null;vista(tabla);});
+    }else{
+        fetch(API+"/"+tabla,{
+        method:"POST",
+        credentials:"include",
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(data)
+        }).then(()=>vista(tabla));
+    }
+}else{
+
+    // 🔥 CLIENTE / EMPLEADO / PROPIETARIO
+
+    if(editId){
+
+        // 👉 EDITAR (actualiza PERSONA)
+        fetch(API+"/personas/"+editId,{
+            method:"PUT",
+            credentials:"include",
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+                nombre:nombre.value,
+                apellido:apellido.value,
+                idTipoPersona:tipo.value
+            })
+        }).then(()=>{
+            editId=null;
+            vista(tabla);
+        });
+
+    }else{
+
+        // 👉 CREAR
+
+        // 1. crear persona
+        fetch(API+"/personas",{
+            method:"POST",
+            credentials:"include",
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+                nombre:nombre.value,
+                apellido:apellido.value,
+                idTipoPersona:tipo.value
+            })
+        })
+        .then(r=>r.json())
+        .then(d=>{
+
+            // 2. crear cliente/empleado/etc
+            fetch(API+"/"+tabla,{
+                method:"POST",
+                credentials:"include",
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({
+                    idPersona: d.idPersona
+                })
+            }).then(()=>vista(tabla));
+
+        });
+
+    }
+
+
+    }
+    }
+
+
+function editar(obj,tabla){
+
+if(tabla==="tipos"){
+    editId = obj.idTipoPersona;
+    descripcion.value = obj.descripcion;
+    return;
 }
 
-function editarPersona(id,nombre,apellido,tipo){
-document.getElementById("nombre").value=nombre;
-document.getElementById("apellido").value=apellido;
-document.getElementById("tipo").value=tipo;
-
-const btn = document.getElementById("btnGuardar");
-btn.textContent="Actualizar";
-
-btn.onclick=function(){
-fetch(API+"/personas/"+id,{
-method:"PUT",
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({
-nombre:document.getElementById("nombre").value,
-apellido:document.getElementById("apellido").value,
-idTipoPersona:document.getElementById("tipo").value
-})
-}).then(()=>{
-mostrarPersonas();
-});
-};
+if(tabla==="personas"){
+    editId = obj.idPersona;
+    nombre.value = obj.nombre;
+    apellido.value = obj.apellido;
+    setTimeout(()=>{tipo.value=obj.idTipoPersona},200);
+    return;
 }
 
-function eliminarPersona(id){
+// 🔥 cliente / empleado / propietario
+editId = obj.idPersona; // 👈 IMPORTANTE (no el idCliente)
+nombre.value = obj.nombre;
+apellido.value = obj.apellido;
+setTimeout(()=>{tipo.value=obj.idTipoPersona},200);
+
+}
+
+function eliminar(obj,tabla){
+
+let id;
+
+if(tabla==="tipos") id = obj.idTipoPersona;
+else if(tabla==="personas") id = obj.idPersona;
+else if(tabla==="clientes") id = obj.idCliente;
+else if(tabla==="empleados") id = obj.idEmpleado;
+else if(tabla==="propietarios") id = obj.idPropietario;
+
 if(confirm("Eliminar?")){
-fetch(API+"/personas/"+id,{method:"DELETE"})
-.then(()=>cargarPersonas());
+fetch(API+"/"+tabla+"/"+id,{
+method:"DELETE",
+credentials:"include"
+}).then(()=>cargar(tabla));
 }
-}
-
-function limpiarPersona(){
-document.getElementById("nombre").value="";
-document.getElementById("apellido").value="";
-}
-
-function cargarTiposSelect(){
-fetch(API+"/tipos")
-.then(r=>r.json())
-.then(data=>{
-let html="";
-data.forEach(t=>{
-html+=`<option value="${t.idTipoPersona}">${t.descripcion}</option>`;
-});
-document.getElementById("tipo").innerHTML=html;
-});
-}
-
-//////////////// TIPOS
-
-function mostrarTipos(){
-document.getElementById("contenido").innerHTML=`
-
-<h2>Tipo Persona</h2>
-
-<input id="descripcion" placeholder="Descripcion">
-<button onclick="guardarTipo()">Guardar</button>
-
-<br><br>
-
-<table>
-<thead>
-<tr>
-<th>ID</th>
-<th>Descripcion</th>
-<th>Acciones</th>
-</tr>
-</thead>
-<tbody id="tablaTipos"></tbody>
-</table>
-`;
-
-cargarTipos();
 }
 
 function cargarTipos(){
-fetch(API+"/tipos")
+fetch(API+"/tipos",{credentials:"include"})
 .then(r=>r.json())
 .then(data=>{
-let html="";
-
-data.forEach(t=>{
-html+=`
-<tr>
-<td>${t.idTipoPersona}</td>
-<td>${t.descripcion}</td>
-<td>
-<button onclick="eliminarTipo(${t.idTipoPersona})">Eliminar</button>
-</td>
-</tr>
-`;
+tipo.innerHTML=data.map(t=>`<option value="${t.idTipoPersona}">${t.descripcion}</option>`).join("");
 });
-
-document.getElementById("tablaTipos").innerHTML=html;
-});
-}
-
-function guardarTipo(){
-fetch(API+"/tipos",{
-method:"POST",
-headers:{'Content-Type':'application/json'},
-body:JSON.stringify({
-descripcion:document.getElementById("descripcion").value
-})
-}).then(()=>{
-document.getElementById("descripcion").value="";
-cargarTipos();
-});
-}
-
-function eliminarTipo(id){
-if(confirm("Eliminar?")){
-fetch(API+"/tipos/"+id,{method:"DELETE"})
-.then(()=>cargarTipos());
-}
 }
 
 </script>

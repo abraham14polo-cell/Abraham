@@ -4,18 +4,18 @@ exports.getAll = (callback) => {
     db.query("SELECT * FROM TipoPersona", callback);
 };
 
-exports.create = (descripcion, callback) => {
+exports.create = (data, callback) => {
     db.query(
         "INSERT INTO TipoPersona (descripcion) VALUES (?)",
-        [descripcion],
+        [data.descripcion],
         callback
     );
 };
 
-exports.update = (id, descripcion, callback) => {
+exports.update = (id, data, callback) => {
     db.query(
         "UPDATE TipoPersona SET descripcion=? WHERE idTipoPersona=?",
-        [descripcion, id],
+        [data.descripcion, id],
         callback
     );
 };

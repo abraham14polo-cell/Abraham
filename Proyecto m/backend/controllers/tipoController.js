@@ -8,22 +8,22 @@ exports.listar = (req, res) => {
 };
 
 exports.insertar = (req, res) => {
-    model.create(req.body.descripcion, (err) => {
+    model.create(req.body, (err) => {
         if (err) return res.status(500).json(err);
-        res.json({mensaje:"Insertado"});
+        res.json({ ok: true });
     });
 };
 
 exports.actualizar = (req, res) => {
-    model.update(req.params.id, req.body.descripcion, (err) => {
+    model.update(req.params.id, req.body, (err) => {
         if (err) return res.status(500).json(err);
-        res.json({mensaje:"Actualizado"});
+        res.json({ ok: true });
     });
 };
 
 exports.eliminar = (req, res) => {
     model.delete(req.params.id, (err) => {
         if (err) return res.status(500).json(err);
-        res.json({mensaje:"Eliminado"});
+        res.json({ ok: true });
     });
 };
