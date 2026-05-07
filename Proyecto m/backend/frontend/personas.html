@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Personas</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    background:#f1f5f9;
+    margin:0;
+}
+
+.container{
+    width:90%;
+    margin:auto;
+    margin-top:40px;
+}
+
+.card{
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+h1{
+    margin-bottom:20px;
+}
+
+input, select{
+    padding:10px;
+    width:200px;
+    margin-right:5px;
+    margin-bottom:10px;
+}
+
+button{
+    padding:10px 15px;
+    border:none;
+    cursor:pointer;
+    border-radius:5px;
+}
+
+.guardar{
+    background:#2563eb;
+    color:white;
+}
+
+.buscar{
+    background:#0f172a;
+    color:white;
+}
+
+.editar{
+    background:#16a34a;
+    color:white;
+}
+
+.eliminar{
+    background:#dc2626;
+    color:white;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th, td{
+    border:1px solid #ccc;
+    padding:10px;
+}
+
+th{
+    background:#0f172a;
+    color:white;
+}
+
+.top{
+    margin-bottom:20px;
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+<div class="card">
+
+<h1>PERSONAS</h1>
+
+<div class="top">
+    <input id="nombre" placeholder="Nombre">
+    <input id="apellido" placeholder="Apellido">
+    <select id="idTipoPersona">
+        <option value="">-- Tipo Persona --</option>
+    </select>
+    <button class="guardar" onclick="guardar()">Guardar</button>
+</div>
+
+<div class="top">
+    <input id="buscar" placeholder="Buscar por nombre o apellido">
+    <button class="buscar" onclick="cargar()">Buscar</button>
+</div>
+
+<table>
+<thead>
+<tr>
+    <th>ID</th>
+    <th>Nombre</th>
+    <th>Apellido</th>
+    <th>Tipo</th>
+    <th>Acciones</th>
+</tr>
+</thead>
+<tbody id="datos"></tbody>
+</table>
+
+</div>
+</div>
+
+<script>
+
+const API = '/api/personas';
+let editId = null;
+
+// Cargar tipos persona en el combo
+function cargarTipos(){
+    fetch('/api/tipos', {credentials:'include'})
+    .then(r=>r.json())
+    .then(data=>{
+        let sel = document.getElementById('idTipoPersona');
+        for(let t of data){
+            let op = document.createElement('option');
+            op.value = t.idTipoPersona;
+            op.text = t.descripcion;
+            sel.appendChild(op);
+        }
+    });
+}
+
+function cargar(){
+    let texto = document.getElementById('buscar').value;
+    fetch(API + '?buscar=' + texto, {credentials:'include'})
+    .then(r=>r.json())
+    .then(data=>{
+        let html = '';
+        for(let x of data){
+            html += `
+            <tr>
+                <td>${x.idPersona}</td>
+                <td>${x.nombre}</td>
+                <td>${x.apellido}</td>
+                <td>${x.tipo}</td>
+                <td>
+                    <button class="editar" onclick='editar(${JSON.stringify(x)})'>Editar</button>
+                    <button class="eliminar" onclick='eliminar(${x.idPersona})'>Eliminar</button>
+                </td>
+            </tr>`;
+        }
+        document.getElementById('datos').innerHTML = html;
+    });
+}
+
+function guardar(){
+    let data = {
+        nombre: document.getElementById('nombre').value,
+        apellido: document.getElementById('apellido').value,
+        idTipoPersona: document.getElementById('idTipoPersona').value
+    };
+
+    if(editId == null){
+        fetch(API, {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            credentials:'include',
+            body:JSON.stringify(data)
+        }).then(()=>{ limpiar(); cargar(); });
+    } else {
+        fetch(API+'/'+editId, {
+            method:'PUT',
+            headers:{'Content-Type':'application/json'},
+            credentials:'include',
+            body:JSON.stringify(data)
+        }).then(()=>{ editId=null; limpiar(); cargar(); });
+    }
+}
+
+function editar(x){
+    editId = x.idPersona;
+    document.getElementById('nombre').value = x.nombre;
+    document.getElementById('apellido').value = x.apellido;
+    document.getElementById('idTipoPersona').value = x.idTipoPersona;
+}
+
+function eliminar(id){
+    fetch(API+'/'+id, {
+        method:'DELETE',
+        credentials:'include'
+    }).then(()=>{ cargar(); });
+}
+
+function limpiar(){
+    document.getElementById('nombre').value='';
+    document.getElementById('apellido').value='';
+    document.getElementById('idTipoPersona').value='';
+}
+
+// También hay que activar la ruta en index.js
+// Asegúrate que en index.js esté:
+// app.use('/api/personas', require('./routes/personaRoutes'));
+
+cargarTipos();
+cargar();
+
+</script>
+
+</body>
+</html>

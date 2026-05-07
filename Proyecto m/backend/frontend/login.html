@@ -3,59 +3,117 @@
 <head>
 <meta charset="UTF-8">
 <title>Login</title>
+
 <style>
+
 body{
-background:#0f172a;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-font-family:Arial;
+    margin:0;
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#0f172a;
+    font-family:Arial;
 }
+
 .card{
-background:#1e293b;
-padding:30px;
-border-radius:10px;
-color:white;
-width:300px;
+    background:white;
+    width:350px;
+    padding:30px;
+    border-radius:10px;
 }
-input,button{
-width:100%;
-padding:10px;
-margin-top:10px;
-border:none;
-border-radius:5px;
+
+h2{
+    text-align:center;
 }
-button{background:#2563eb;color:white;}
+
+input{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    box-sizing:border-box;
+}
+
+button{
+    width:100%;
+    padding:10px;
+    margin-top:15px;
+    border:none;
+    background:#2563eb;
+    color:white;
+    cursor:pointer;
+}
+
+#error{
+    color:red;
+    text-align:center;
+}
+
 </style>
+
 </head>
 <body>
 
 <div class="card">
-<h2>Login</h2>
+
+<h2>LOGIN</h2>
+
 <input id="usuario" placeholder="Usuario">
-<input id="clave" type="password" placeholder="Clave">
-<button onclick="login()">Entrar</button>
+
+<input
+id="clave"
+type="password"
+placeholder="Clave">
+
+<button onclick="login()">
+Ingresar
+</button>
+
 <p id="error"></p>
+
 </div>
 
 <script>
+
 function login(){
+
 fetch('/api/auth/login',{
+
 method:'POST',
+
+headers:{
+'Content-Type':'application/json'
+},
+
 credentials:'include',
-headers:{'Content-Type':'application/json'},
+
 body:JSON.stringify({
+
 usuario:usuario.value,
 clave:clave.value
+
 })
+
 })
+
 .then(r=>r.json())
-.then(d=>{
-if(d.ok) location="index.html";
-else error.innerText="Error login";
-});
+
+.then(data=>{
+
+if(data.ok){
+
+location='menu.html';
+
+}else{
+
+error.innerHTML='Usuario o clave incorrecta';
+
 }
+
+});
+
+}
+
 </script>
 
 </body>

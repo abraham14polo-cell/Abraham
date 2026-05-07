@@ -1,4 +1,4 @@
-const model = require('../models/personaModel');
+const model = require('../models/ciudadModel');
 
 exports.listar = (req, res) => {
     const buscar = req.query.buscar || "";

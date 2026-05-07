@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Apartamentos</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    background:#f1f5f9;
+    margin:0;
+}
+
+.container{
+    width:90%;
+    margin:auto;
+    margin-top:40px;
+}
+
+.card{
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+h1{ margin-bottom:20px; }
+
+input, select{
+    padding:10px;
+    width:180px;
+    margin-right:5px;
+    margin-bottom:10px;
+}
+
+button{
+    padding:10px 15px;
+    border:none;
+    cursor:pointer;
+    border-radius:5px;
+}
+
+.guardar{ background:#2563eb; color:white; }
+.buscar{ background:#0f172a; color:white; }
+.editar{ background:#16a34a; color:white; }
+.eliminar{ background:#dc2626; color:white; }
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th, td{
+    border:1px solid #ccc;
+    padding:10px;
+}
+
+th{
+    background:#0f172a;
+    color:white;
+}
+
+.top{ margin-bottom:20px; }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+<div class="card">
+
+<h1>APARTAMENTOS</h1>
+
+<div class="top">
+    <select id="idPropietario">
+        <option value="">-- Propietario --</option>
+    </select>
+    <select id="idCiudad">
+        <option value="">-- Ciudad --</option>
+    </select>
+    <input id="direccion" placeholder="Dirección">
+    <input id="numeroHabitacion" type="number" placeholder="N° Habitaciones">
+    <select id="estado">
+        <option value="1">Disponible</option>
+        <option value="0">Ocupado</option>
+    </select>
+    <input id="pagoMensual" type="number" placeholder="Pago Mensual">
+    <button class="guardar" onclick="guardar()">Guardar</button>
+</div>
+
+<div class="top">
+    <input id="buscar" placeholder="Buscar por dirección">
+    <button class="buscar" onclick="cargar()">Buscar</button>
+</div>
+
+<table>
+<thead>
+<tr>
+    <th>ID</th>
+    <th>Dirección</th>
+    <th>Habitaciones</th>
+    <th>Estado</th>
+    <th>Pago Mensual</th>
+    <th>Propietario</th>
+    <th>Ciudad</th>
+    <th>Acciones</th>
+</tr>
+</thead>
+<tbody id="datos"></tbody>
+</table>
+
+</div>
+</div>
+
+<script>
+
+const API = '/api/apartamentos';
+let editId = null;
+
+function cargarPropietarios(){
+    fetch('/api/propietarios', {credentials:'include'})
+    .then(r=>r.json())
+    .then(data=>{
+        let sel = document.getElementById('idPropietario');
+        sel.innerHTML = '<option value="">-- Propietario --</option>';
+        for(let p of data){
+            let op = document.createElement('option');
+            op.value = p.idPropietario;
+            op.text = p.nombre + ' ' + p.apellido;
+            sel.appendChild(op);
+        }
+    });
+}
+
+function cargarCiudades(){
+    fetch('/api/ciudades', {credentials:'include'})
+    .then(r=>r.json())
+    .then(data=>{
+        let sel = document.getElementById('idCiudad');
+        sel.innerHTML = '<option value="">-- Ciudad --</option>';
+        for(let c of data){
+            let op = document.createElement('option');
+            op.value = c.idCiudad;
+            op.text = c.nombre;
+            sel.appendChild(op);
+        }
+    });
+}
+
+function cargar(){
+    let texto = document.getElementById('buscar').value;
+    fetch(API + '?buscar=' + texto, {credentials:'include'})
+    .then(r=>r.json())
+    .then(data=>{
+        let html = '';
+        for(let x of data){
+            html += `
+            <tr>
+                <td>${x.idApartamento}</td>
+                <td>${x.direccion}</td>
+                <td>${x.numeroHabitacion}</td>
+                <td>${x.estado == 1 ? 'Disponible' : 'Ocupado'}</td>
+                <td>$${x.pagoMensual}</td>
+                <td>${x.propietario}</td>
+                <td>${x.ciudad}</td>
+                <td>
+                    <button class="editar" onclick='editar(${JSON.stringify(x)})'>Editar</button>
+                    <button class="eliminar" onclick='eliminar(${x.idApartamento})'>Eliminar</button>
+                </td>
+            </tr>`;
+        }
+        document.getElementById('datos').innerHTML = html;
+    });
+}
+
+function guardar(){
+    let data = {
+        idPropietario: document.getElementById('idPropietario').value,
+        idCiudad: document.getElementById('idCiudad').value,
+        direccion: document.getElementById('direccion').value,
+        numeroHabitacion: document.getElementById('numeroHabitacion').value,
+        estado: document.getElementById('estado').value,
+        pagoMensual: document.getElementById('pagoMensual').value
+    };
+
+    if(editId == null){
+        fetch(API, {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            credentials:'include',
+            body:JSON.stringify(data)
+        }).then(()=>{ limpiar(); cargar(); });
+    } else {
+        fetch(API+'/'+editId, {
+            method:'PUT',
+            headers:{'Content-Type':'application/json'},
+            credentials:'include',
+            body:JSON.stringify(data)
+        }).then(()=>{ editId=null; limpiar(); cargar(); });
+    }
+}
+
+function editar(x){
+    editId = x.idApartamento;
+    document.getElementById('idPropietario').value = x.idPropietario;
+    document.getElementById('idCiudad').value = x.idCiudad;
+    document.getElementById('direccion').value = x.direccion;
+    document.getElementById('numeroHabitacion').value = x.numeroHabitacion;
+    document.getElementById('estado').value = x.estado;
+    document.getElementById('pagoMensual').value = x.pagoMensual;
+}
+
+function eliminar(id){
+    fetch(API+'/'+id, {
+        method:'DELETE',
+        credentials:'include'
+    }).then(()=>{ cargar(); });
+}
+
+function limpiar(){
+    document.getElementById('idPropietario').value='';
+    document.getElementById('idCiudad').value='';
+    document.getElementById('direccion').value='';
+    document.getElementById('numeroHabitacion').value='';
+    document.getElementById('estado').value='1';
+    document.getElementById('pagoMensual').value='';
+}
+
+cargarPropietarios();
+cargarCiudades();
+cargar();
+
+</script>
+
+</body>
+</html>
