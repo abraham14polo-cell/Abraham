@@ -2,69 +2,24 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Departamentos</title>
+<title>Perfil</title>
 
 <style>
-
-body{
-    font-family:Arial;
-    background:#f1f5f9;
-    margin:0;
-}
-
-.container{
-    width:90%;
-    margin:auto;
-    margin-top:40px;
-}
-
-.card{
-    background:white;
-    padding:25px;
-    border-radius:10px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.1);
-}
-
+body{ font-family:Arial; background:#f1f5f9; margin:0; }
+.container{ width:90%; margin:auto; margin-top:40px; }
+.card{ background:white; padding:25px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1); }
 h1{ margin-bottom:20px; }
-
-input, select{
-    padding:10px;
-    width:200px;
-    margin-right:5px;
-    margin-bottom:10px;
-}
-
-button{
-    padding:10px 15px;
-    border:none;
-    cursor:pointer;
-    border-radius:5px;
-}
-
+input{ padding:10px; width:180px; margin-right:5px; margin-bottom:10px; }
+button{ padding:10px 15px; border:none; cursor:pointer; border-radius:5px; }
 .guardar{ background:#2563eb; color:white; }
 .buscar{ background:#0f172a; color:white; }
 .editar{ background:#16a34a; color:white; }
 .eliminar{ background:#dc2626; color:white; }
 .volver{ background:#475569; color:white; margin-bottom:20px; }
-
-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:20px;
-}
-
-th, td{
-    border:1px solid #ccc;
-    padding:10px;
-}
-
-th{
-    background:#0f172a;
-    color:white;
-}
-
+table{ width:100%; border-collapse:collapse; margin-top:20px; }
+th, td{ border:1px solid #ccc; padding:10px; }
+th{ background:#0f172a; color:white; }
 .top{ margin-bottom:20px; }
-
 </style>
 </head>
 <body>
@@ -74,18 +29,15 @@ th{
 <div class="container">
 <div class="card">
 
-<h1>DEPARTAMENTOS</h1>
+<h1>PERFIL</h1>
 
 <div class="top">
-    <select id="idPais">
-        <option value="">-- Seleccionar País --</option>
-    </select>
-    <input id="nombre" placeholder="Nombre del departamento">
+    <input id="descripcion" placeholder="Descripción">
     <button class="guardar" onclick="guardar()">Guardar</button>
 </div>
 
 <div class="top">
-    <input id="buscar" placeholder="Buscar departamento">
+    <input id="buscar" placeholder="Buscar perfil">
     <button class="buscar" onclick="cargar()">Buscar</button>
 </div>
 
@@ -93,8 +45,7 @@ th{
 <thead>
 <tr>
     <th>ID</th>
-    <th>Nombre</th>
-    <th>País</th>
+    <th>Descripción</th>
     <th>Acciones</th>
 </tr>
 </thead>
@@ -106,23 +57,8 @@ th{
 
 <script>
 
-const API = '/api/departamentos';
+const API = '/api/perfiles';
 let editId = null;
-
-function cargarPaises(){
-    fetch('/api/paises', {credentials:'include'})
-    .then(r=>r.json())
-    .then(data=>{
-        let sel = document.getElementById('idPais');
-        sel.innerHTML = '<option value="">-- Seleccionar País --</option>';
-        for(let p of data){
-            let op = document.createElement('option');
-            op.value = p.idPais;
-            op.text = p.nombre;
-            sel.appendChild(op);
-        }
-    });
-}
 
 function cargar(){
     let texto = document.getElementById('buscar').value;
@@ -133,12 +69,11 @@ function cargar(){
         for(let x of data){
             html += `
             <tr>
-                <td>${x.idDepartamento}</td>
-                <td>${x.nombre}</td>
-                <td>${x.pais}</td>
+                <td>${x.idPerfil}</td>
+                <td>${x.descripcion}</td>
                 <td>
                     <button class="editar" onclick='editar(${JSON.stringify(x)})'>Editar</button>
-                    <button class="eliminar" onclick='eliminar(${x.idDepartamento})'>Eliminar</button>
+                    <button class="eliminar" onclick='eliminar(${x.idPerfil})'>Eliminar</button>
                 </td>
             </tr>`;
         }
@@ -148,8 +83,7 @@ function cargar(){
 
 function guardar(){
     let data = {
-        idPais: document.getElementById('idPais').value,
-        nombre: document.getElementById('nombre').value
+        descripcion: document.getElementById('descripcion').value
     };
 
     if(editId == null){
@@ -170,9 +104,8 @@ function guardar(){
 }
 
 function editar(x){
-    editId = x.idDepartamento;
-    document.getElementById('idPais').value = x.idPais;
-    document.getElementById('nombre').value = x.nombre;
+    editId = x.idPerfil;
+    document.getElementById('descripcion').value = x.descripcion;
 }
 
 function eliminar(id){
@@ -183,11 +116,10 @@ function eliminar(id){
 }
 
 function limpiar(){
-    document.getElementById('idPais').value='';
-    document.getElementById('nombre').value='';
+    document.getElementById('descripcion').value='';
+    editId = null;
 }
 
-cargarPaises();
 cargar();
 
 </script>

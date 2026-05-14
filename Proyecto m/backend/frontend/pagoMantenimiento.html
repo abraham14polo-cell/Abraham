@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Clientes</title>
+<title>Pago Mantenimiento</title>
 
 <style>
 
@@ -25,13 +25,11 @@ body{
     box-shadow:0 2px 10px rgba(0,0,0,0.1);
 }
 
-h1{
-    margin-bottom:20px;
-}
+h1{ margin-bottom:20px; }
 
 input, select{
     padding:10px;
-    width:200px;
+    width:180px;
     margin-right:5px;
     margin-bottom:10px;
 }
@@ -70,33 +68,37 @@ th{
 </style>
 </head>
 <body>
-
+<button class="volver" onclick="window.history.back()">&#8592; Volver al Menú</button>
 <div class="container">
 <div class="card">
 
-<button class="volver" onclick="window.history.back()">&#8592; Volver al Menú</button>
-
-<h1>CLIENTES</h1>
+<h1>PAGO MANTENIMIENTO</h1>
 
 <div class="top">
-    <select id="idPersona">
-        <option value="">-- Seleccionar Persona --</option>
+    <select id="idMantenimiento">
+        <option value="">-- Mantenimiento --</option>
     </select>
+    <select id="idFormaPago">
+        <option value="">-- Forma de Pago --</option>
+    </select>
+    <input id="fechaPago" type="datetime-local" placeholder="Fecha Pago">
+    <input id="valor" type="number" placeholder="Valor">
     <button class="guardar" onclick="guardar()">Guardar</button>
 </div>
 
 <div class="top">
-    <input id="buscar" placeholder="Buscar por nombre o apellido">
+    <input id="buscar" placeholder="Buscar por apartamento o forma de pago">
     <button class="buscar" onclick="cargar()">Buscar</button>
 </div>
 
 <table>
 <thead>
 <tr>
-    <th>ID Cliente</th>
-    <th>ID Persona</th>
-    <th>Nombre</th>
-    <th>Apellido</th>
+    <th>ID</th>
+    <th>Mantenimiento</th>
+    <th>Forma de Pago</th>
+    <th>Fecha Pago</th>
+    <th>Valor</th>
     <th>Acciones</th>
 </tr>
 </thead>
@@ -108,19 +110,34 @@ th{
 
 <script>
 
-const API = '/api/clientes';
+const API = '/api/pagomantenimiento';
 let editId = null;
 
-function cargarPersonas(){
-    fetch('/api/personas', {credentials:'include'})
+function cargarMantenimientos(){
+    fetch('/api/mantenimientos', {credentials:'include'})
     .then(r=>r.json())
     .then(data=>{
-        let sel = document.getElementById('idPersona');
-        sel.innerHTML = '<option value="">-- Seleccionar Persona --</option>';
-        for(let p of data){
+        let sel = document.getElementById('idMantenimiento');
+        sel.innerHTML = '<option value="">-- Mantenimiento --</option>';
+        for(let m of data){
             let op = document.createElement('option');
-            op.value = p.idPersona;
-            op.text = p.nombre + ' ' + p.apellido;
+            op.value = m.idMantenimiento;
+            op.text = m.apartamento + ' - ' + new Date(m.fecha).toLocaleDateString();
+            sel.appendChild(op);
+        }
+    });
+}
+
+function cargarFormasPago(){
+    fetch('/api/formapago', {credentials:'include'})
+    .then(r=>r.json())
+    .then(data=>{
+        let sel = document.getElementById('idFormaPago');
+        sel.innerHTML = '<option value="">-- Forma de Pago --</option>';
+        for(let f of data){
+            let op = document.createElement('option');
+            op.value = f.idFormaPago;
+            op.text = f.descripcion;
             sel.appendChild(op);
         }
     });
@@ -135,13 +152,14 @@ function cargar(){
         for(let x of data){
             html += `
             <tr>
-                <td>${x.idCliente}</td>
-                <td>${x.idPersona}</td>
-                <td>${x.nombre}</td>
-                <td>${x.apellido}</td>
+                <td>${x.idPagoMantenimiento}</td>
+                <td>${x.apartamento}</td>
+                <td>${x.formaPago}</td>
+                <td>${new Date(x.fechaPago).toLocaleDateString()}</td>
+                <td>$${x.valor}</td>
                 <td>
                     <button class="editar" onclick='editar(${JSON.stringify(x)})'>Editar</button>
-                    <button class="eliminar" onclick='eliminar(${x.idCliente})'>Eliminar</button>
+                    <button class="eliminar" onclick='eliminar(${x.idPagoMantenimiento})'>Eliminar</button>
                 </td>
             </tr>`;
         }
@@ -151,7 +169,10 @@ function cargar(){
 
 function guardar(){
     let data = {
-        idPersona: document.getElementById('idPersona').value
+        idMantenimiento: document.getElementById('idMantenimiento').value,
+        idFormaPago: document.getElementById('idFormaPago').value,
+        fechaPago: document.getElementById('fechaPago').value,
+        valor: document.getElementById('valor').value
     };
 
     if(editId == null){
@@ -172,8 +193,11 @@ function guardar(){
 }
 
 function editar(x){
-    editId = x.idCliente;
-    document.getElementById('idPersona').value = x.idPersona;
+    editId = x.idPagoMantenimiento;
+    document.getElementById('idMantenimiento').value = x.idMantenimiento;
+    document.getElementById('idFormaPago').value = x.idFormaPago;
+    document.getElementById('fechaPago').value = new Date(x.fechaPago).toISOString().slice(0,16);
+    document.getElementById('valor').value = x.valor;
 }
 
 function eliminar(id){
@@ -184,10 +208,14 @@ function eliminar(id){
 }
 
 function limpiar(){
-    document.getElementById('idPersona').value='';
+    document.getElementById('idMantenimiento').value='';
+    document.getElementById('idFormaPago').value='';
+    document.getElementById('fechaPago').value='';
+    document.getElementById('valor').value='';
 }
 
-cargarPersonas();
+cargarMantenimientos();
+cargarFormasPago();
 cargar();
 
 </script>

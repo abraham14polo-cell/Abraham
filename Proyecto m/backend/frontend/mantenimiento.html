@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Departamentos</title>
+<title>Mantenimiento</title>
 
 <style>
 
@@ -29,7 +29,7 @@ h1{ margin-bottom:20px; }
 
 input, select{
     padding:10px;
-    width:200px;
+    width:180px;
     margin-right:5px;
     margin-bottom:10px;
 }
@@ -68,24 +68,27 @@ th{
 </style>
 </head>
 <body>
-
 <button class="volver" onclick="window.history.back()">&#8592; Volver al Menú</button>
-
 <div class="container">
 <div class="card">
 
-<h1>DEPARTAMENTOS</h1>
+<h1>MANTENIMIENTO</h1>
 
 <div class="top">
-    <select id="idPais">
-        <option value="">-- Seleccionar País --</option>
+    <select id="idApartamento">
+        <option value="">-- Apartamento --</option>
     </select>
-    <input id="nombre" placeholder="Nombre del departamento">
+    <select id="idEmpleado">
+        <option value="">-- Empleado --</option>
+    </select>
+    <input id="fecha" type="datetime-local" placeholder="Fecha">
+    <input id="descripcion" placeholder="Descripción">
+    <input id="valor" type="number" placeholder="Valor">
     <button class="guardar" onclick="guardar()">Guardar</button>
 </div>
 
 <div class="top">
-    <input id="buscar" placeholder="Buscar departamento">
+    <input id="buscar" placeholder="Buscar por apartamento o empleado">
     <button class="buscar" onclick="cargar()">Buscar</button>
 </div>
 
@@ -93,8 +96,11 @@ th{
 <thead>
 <tr>
     <th>ID</th>
-    <th>Nombre</th>
-    <th>País</th>
+    <th>Apartamento</th>
+    <th>Empleado</th>
+    <th>Fecha</th>
+    <th>Descripción</th>
+    <th>Valor</th>
     <th>Acciones</th>
 </tr>
 </thead>
@@ -106,19 +112,34 @@ th{
 
 <script>
 
-const API = '/api/departamentos';
+const API = '/api/mantenimientos';
 let editId = null;
 
-function cargarPaises(){
-    fetch('/api/paises', {credentials:'include'})
+function cargarApartamentos(){
+    fetch('/api/apartamentos', {credentials:'include'})
     .then(r=>r.json())
     .then(data=>{
-        let sel = document.getElementById('idPais');
-        sel.innerHTML = '<option value="">-- Seleccionar País --</option>';
-        for(let p of data){
+        let sel = document.getElementById('idApartamento');
+        sel.innerHTML = '<option value="">-- Apartamento --</option>';
+        for(let a of data){
             let op = document.createElement('option');
-            op.value = p.idPais;
-            op.text = p.nombre;
+            op.value = a.idApartamento;
+            op.text = a.direccion;
+            sel.appendChild(op);
+        }
+    });
+}
+
+function cargarEmpleados(){
+    fetch('/api/empleados', {credentials:'include'})
+    .then(r=>r.json())
+    .then(data=>{
+        let sel = document.getElementById('idEmpleado');
+        sel.innerHTML = '<option value="">-- Empleado --</option>';
+        for(let e of data){
+            let op = document.createElement('option');
+            op.value = e.idEmpleado;
+            op.text = e.nombre + ' ' + e.apellido;
             sel.appendChild(op);
         }
     });
@@ -133,12 +154,15 @@ function cargar(){
         for(let x of data){
             html += `
             <tr>
-                <td>${x.idDepartamento}</td>
-                <td>${x.nombre}</td>
-                <td>${x.pais}</td>
+                <td>${x.idMantenimiento}</td>
+                <td>${x.apartamento}</td>
+                <td>${x.empleado}</td>
+                <td>${new Date(x.fecha).toLocaleDateString()}</td>
+                <td>${x.descripcion || '-'}</td>
+                <td>$${x.valor}</td>
                 <td>
                     <button class="editar" onclick='editar(${JSON.stringify(x)})'>Editar</button>
-                    <button class="eliminar" onclick='eliminar(${x.idDepartamento})'>Eliminar</button>
+                    <button class="eliminar" onclick='eliminar(${x.idMantenimiento})'>Eliminar</button>
                 </td>
             </tr>`;
         }
@@ -148,8 +172,11 @@ function cargar(){
 
 function guardar(){
     let data = {
-        idPais: document.getElementById('idPais').value,
-        nombre: document.getElementById('nombre').value
+        idApartamento: document.getElementById('idApartamento').value,
+        idEmpleado: document.getElementById('idEmpleado').value,
+        fecha: document.getElementById('fecha').value,
+        descripcion: document.getElementById('descripcion').value,
+        valor: document.getElementById('valor').value
     };
 
     if(editId == null){
@@ -170,9 +197,12 @@ function guardar(){
 }
 
 function editar(x){
-    editId = x.idDepartamento;
-    document.getElementById('idPais').value = x.idPais;
-    document.getElementById('nombre').value = x.nombre;
+    editId = x.idMantenimiento;
+    document.getElementById('idApartamento').value = x.idApartamento;
+    document.getElementById('idEmpleado').value = x.idEmpleado;
+    document.getElementById('fecha').value = new Date(x.fecha).toISOString().slice(0,16);
+    document.getElementById('descripcion').value = x.descripcion || '';
+    document.getElementById('valor').value = x.valor;
 }
 
 function eliminar(id){
@@ -183,11 +213,15 @@ function eliminar(id){
 }
 
 function limpiar(){
-    document.getElementById('idPais').value='';
-    document.getElementById('nombre').value='';
+    document.getElementById('idApartamento').value='';
+    document.getElementById('idEmpleado').value='';
+    document.getElementById('fecha').value='';
+    document.getElementById('descripcion').value='';
+    document.getElementById('valor').value='';
 }
 
-cargarPaises();
+cargarApartamentos();
+cargarEmpleados();
 cargar();
 
 </script>

@@ -2,7 +2,9 @@ const db = require('../config/db');
 
 exports.getAll = (buscar, callback) => {
     db.query(`
-        SELECT a.*, 
+        SELECT a.idApartamento, a.idPropietario, a.idCiudad,
+            a.direccion, a.numeroHabitacion, a.pagoMensual,
+            CAST(a.estado AS UNSIGNED) AS estado,
             CONCAT(p.nombre, ' ', p.apellido) as propietario,
             c.nombre as ciudad
         FROM Apartamento a
@@ -26,7 +28,7 @@ exports.update = (id, data, callback) => {
     db.query(
         `UPDATE Apartamento SET idPropietario=?, idCiudad=?, direccion=?, numeroHabitacion=?, estado=?, pagoMensual=?
          WHERE idApartamento=?`,
-        [data.idPropietario, data.idCiudad, data.direccion, data.numeroHabitacion, data.estado, data.pagoMensual, id],
+        [data.idPropietario, data.idCiudad, data.direccion, data.numeroHabitacion, parseInt(data.estado), data.pagoMensual, id],
         callback
     );
 };

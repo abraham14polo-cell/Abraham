@@ -2,101 +2,59 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Clientes</title>
+<title>Usuarios</title>
 
 <style>
-
-body{
-    font-family:Arial;
-    background:#f1f5f9;
-    margin:0;
-}
-
-.container{
-    width:90%;
-    margin:auto;
-    margin-top:40px;
-}
-
-.card{
-    background:white;
-    padding:25px;
-    border-radius:10px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.1);
-}
-
-h1{
-    margin-bottom:20px;
-}
-
-input, select{
-    padding:10px;
-    width:200px;
-    margin-right:5px;
-    margin-bottom:10px;
-}
-
-button{
-    padding:10px 15px;
-    border:none;
-    cursor:pointer;
-    border-radius:5px;
-}
-
+body{ font-family:Arial; background:#f1f5f9; margin:0; }
+.container{ width:90%; margin:auto; margin-top:40px; }
+.card{ background:white; padding:25px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.1); }
+h1{ margin-bottom:20px; }
+input, select{ padding:10px; width:180px; margin-right:5px; margin-bottom:10px; }
+button{ padding:10px 15px; border:none; cursor:pointer; border-radius:5px; }
 .guardar{ background:#2563eb; color:white; }
 .buscar{ background:#0f172a; color:white; }
 .editar{ background:#16a34a; color:white; }
 .eliminar{ background:#dc2626; color:white; }
 .volver{ background:#475569; color:white; margin-bottom:20px; }
-
-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:20px;
-}
-
-th, td{
-    border:1px solid #ccc;
-    padding:10px;
-}
-
-th{
-    background:#0f172a;
-    color:white;
-}
-
+table{ width:100%; border-collapse:collapse; margin-top:20px; }
+th, td{ border:1px solid #ccc; padding:10px; }
+th{ background:#0f172a; color:white; }
 .top{ margin-bottom:20px; }
-
 </style>
 </head>
 <body>
 
+<button class="volver" onclick="window.history.back()">&#8592; Volver al Menú</button>
+
 <div class="container">
 <div class="card">
 
-<button class="volver" onclick="window.history.back()">&#8592; Volver al Menú</button>
-
-<h1>CLIENTES</h1>
+<h1>USUARIOS</h1>
 
 <div class="top">
+    <input id="nombreUsuario" placeholder="Nombre de usuario">
+    <input id="clave" type="password" placeholder="Clave">
     <select id="idPersona">
-        <option value="">-- Seleccionar Persona --</option>
+        <option value="">-- Persona --</option>
+    </select>
+    <select id="idPerfil">
+        <option value="">-- Perfil --</option>
     </select>
     <button class="guardar" onclick="guardar()">Guardar</button>
 </div>
 
 <div class="top">
-    <input id="buscar" placeholder="Buscar por nombre o apellido">
+    <input id="buscar" placeholder="Buscar usuario">
     <button class="buscar" onclick="cargar()">Buscar</button>
 </div>
 
 <table>
 <thead>
 <tr>
-    <th>ID Cliente</th>
-    <th>ID Persona</th>
-    <th>Nombre</th>
-    <th>Apellido</th>
+    <th>ID</th>
+    <th>Usuario</th>
+    <th>Persona</th>
+    <th>Perfil</th>
     <th>Acciones</th>
 </tr>
 </thead>
@@ -108,7 +66,7 @@ th{
 
 <script>
 
-const API = '/api/clientes';
+const API = '/api/usuarios';
 let editId = null;
 
 function cargarPersonas(){
@@ -116,11 +74,26 @@ function cargarPersonas(){
     .then(r=>r.json())
     .then(data=>{
         let sel = document.getElementById('idPersona');
-        sel.innerHTML = '<option value="">-- Seleccionar Persona --</option>';
+        sel.innerHTML = '<option value="">-- Persona --</option>';
         for(let p of data){
             let op = document.createElement('option');
             op.value = p.idPersona;
             op.text = p.nombre + ' ' + p.apellido;
+            sel.appendChild(op);
+        }
+    });
+}
+
+function cargarPerfiles(){
+    fetch('/api/perfiles', {credentials:'include'})
+    .then(r=>r.json())
+    .then(data=>{
+        let sel = document.getElementById('idPerfil');
+        sel.innerHTML = '<option value="">-- Perfil --</option>';
+        for(let p of data){
+            let op = document.createElement('option');
+            op.value = p.idPerfil;
+            op.text = p.descripcion;
             sel.appendChild(op);
         }
     });
@@ -135,13 +108,13 @@ function cargar(){
         for(let x of data){
             html += `
             <tr>
-                <td>${x.idCliente}</td>
-                <td>${x.idPersona}</td>
-                <td>${x.nombre}</td>
-                <td>${x.apellido}</td>
+                <td>${x.idUsuario}</td>
+                <td>${x.nombreUsuario}</td>
+                <td>${x.persona}</td>
+                <td>${x.perfil}</td>
                 <td>
                     <button class="editar" onclick='editar(${JSON.stringify(x)})'>Editar</button>
-                    <button class="eliminar" onclick='eliminar(${x.idCliente})'>Eliminar</button>
+                    <button class="eliminar" onclick='eliminar(${x.idUsuario})'>Eliminar</button>
                 </td>
             </tr>`;
         }
@@ -151,7 +124,10 @@ function cargar(){
 
 function guardar(){
     let data = {
-        idPersona: document.getElementById('idPersona').value
+        nombreUsuario: document.getElementById('nombreUsuario').value,
+        clave: document.getElementById('clave').value,
+        idPersona: document.getElementById('idPersona').value,
+        idPerfil: document.getElementById('idPerfil').value
     };
 
     if(editId == null){
@@ -172,8 +148,11 @@ function guardar(){
 }
 
 function editar(x){
-    editId = x.idCliente;
+    editId = x.idUsuario;
+    document.getElementById('nombreUsuario').value = x.nombreUsuario;
+    document.getElementById('clave').value = x.clave;
     document.getElementById('idPersona').value = x.idPersona;
+    document.getElementById('idPerfil').value = x.idPerfil;
 }
 
 function eliminar(id){
@@ -184,10 +163,15 @@ function eliminar(id){
 }
 
 function limpiar(){
+    document.getElementById('nombreUsuario').value='';
+    document.getElementById('clave').value='';
     document.getElementById('idPersona').value='';
+    document.getElementById('idPerfil').value='';
+    editId = null;
 }
 
 cargarPersonas();
+cargarPerfiles();
 cargar();
 
 </script>

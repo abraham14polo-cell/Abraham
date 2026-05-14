@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Pago Contrato</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    background:#f1f5f9;
+    margin:0;
+}
+
+.container{
+    width:90%;
+    margin:auto;
+    margin-top:40px;
+}
+
+.card{
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+h1{ margin-bottom:20px; }
+
+input, select{
+    padding:10px;
+    width:180px;
+    margin-right:5px;
+    margin-bottom:10px;
+}
+
+button{
+    padding:10px 15px;
+    border:none;
+    cursor:pointer;
+    border-radius:5px;
+}
+
+.guardar{ background:#2563eb; color:white; }
+.buscar{ background:#0f172a; color:white; }
+.editar{ background:#16a34a; color:white; }
+.eliminar{ background:#dc2626; color:white; }
+.volver{ background:#475569; color:white; margin-bottom:20px; }
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th, td{
+    border:1px solid #ccc;
+    padding:10px;
+}
+
+th{
+    background:#0f172a;
+    color:white;
+}
+
+.top{ margin-bottom:20px; }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+<div class="card">
+
+<button class="btn-volver" onclick="window.history.back()">&#8592; Volver al Menú</button>
+
+<h1>PAGO CONTRATO</h1>
+
+<div class="top">
+    <select id="idContrato">
+        <option value="">-- Contrato --</option>
+    </select>
+    <select id="idFormaPago">
+        <option value="">-- Forma de Pago --</option>
+    </select>
+    <input id="fechaPago" type="datetime-local" placeholder="Fecha Pago">
+    <input id="valor" type="number" placeholder="Valor">
+    <button class="guardar" onclick="guardar()">Guardar</button>
+</div>
+
+<div class="top">
+    <input id="buscar" placeholder="Buscar por apartamento, cliente o forma de pago">
+    <button class="buscar" onclick="cargar()">Buscar</button>
+</div>
+
+<table>
+<thead>
+<tr>
+    <th>ID</th>
+    <th>Cliente</th>
+    <th>Apartamento</th>
+    <th>Forma de Pago</th>
+    <th>Fecha Pago</th>
+    <th>Valor</th>
+    <th>Acciones</th>
+</tr>
+</thead>
+<tbody id="datos"></tbody>
+</table>
+
+</div>
+</div>
+
+<script>
+
+const API = '/api/pagocontrato';
+let editId = null;
+
+function cargarContratos(){
+    fetch('/api/contratos', {credentials:'include'})
+    .then(r=>r.json())
+    .then(data=>{
+        let sel = document.getElementById('idContrato');
+        sel.innerHTML = '<option value="">-- Contrato --</option>';
+        for(let c of data){
+            let op = document.createElement('option');
+            op.value = c.idContrato;
+            op.text = 'Contrato #' + c.idContrato + ' - ' + c.cliente + ' / ' + c.apartamento;
+            sel.appendChild(op);
+        }
+    });
+}
+
+function cargarFormasPago(){
+    fetch('/api/formapago', {credentials:'include'})
+    .then(r=>r.json())
+    .then(data=>{
+        let sel = document.getElementById('idFormaPago');
+        sel.innerHTML = '<option value="">-- Forma de Pago --</option>';
+        for(let f of data){
+            let op = document.createElement('option');
+            op.value = f.idFormaPago;
+            op.text = f.descripcion;
+            sel.appendChild(op);
+        }
+    });
+}
+
+function cargar(){
+    let texto = document.getElementById('buscar').value;
+    fetch(API + '?buscar=' + texto, {credentials:'include'})
+    .then(r=>r.json())
+    .then(data=>{
+        let html = '';
+        for(let x of data){
+            html += `
+            <tr>
+                <td>${x.idPagoContrato}</td>
+                <td>${x.cliente}</td>
+                <td>${x.apartamento}</td>
+                <td>${x.formaPago}</td>
+                <td>${new Date(x.fechaPago).toLocaleDateString('es-CO')}</td>
+                <td>$${Number(x.valor).toLocaleString('es-CO')}</td>
+                <td>
+                    <button class="editar" onclick='editar(${JSON.stringify(x)})'>Editar</button>
+                    <button class="eliminar" onclick='eliminar(${x.idPagoContrato})'>Eliminar</button>
+                </td>
+            </tr>`;
+        }
+        document.getElementById('datos').innerHTML = html;
+    });
+}
+
+function guardar(){
+    let data = {
+        idContrato: document.getElementById('idContrato').value,
+        idFormaPago: document.getElementById('idFormaPago').value,
+        fechaPago: document.getElementById('fechaPago').value,
+        valor: document.getElementById('valor').value
+    };
+
+    if(!data.idContrato || !data.idFormaPago || !data.fechaPago || !data.valor){
+        alert('Complete todos los campos');
+        return;
+    }
+
+    if(editId == null){
+        fetch(API, {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            credentials:'include',
+            body:JSON.stringify(data)
+        }).then(()=>{ limpiar(); cargar(); });
+    } else {
+        fetch(API+'/'+editId, {
+            method:'PUT',
+            headers:{'Content-Type':'application/json'},
+            credentials:'include',
+            body:JSON.stringify(data)
+        }).then(()=>{ editId=null; limpiar(); cargar(); });
+    }
+}
+
+function editar(x){
+    editId = x.idPagoContrato;
+    document.getElementById('idContrato').value = x.idContrato;
+    document.getElementById('idFormaPago').value = x.idFormaPago;
+    document.getElementById('fechaPago').value = new Date(x.fechaPago).toISOString().slice(0,16);
+    document.getElementById('valor').value = x.valor;
+}
+
+function eliminar(id){
+    if(confirm('¿Eliminar este pago?')){
+        fetch(API+'/'+id, {
+            method:'DELETE',
+            credentials:'include'
+        }).then(()=>{ cargar(); });
+    }
+}
+
+function limpiar(){
+    document.getElementById('idContrato').value='';
+    document.getElementById('idFormaPago').value='';
+    document.getElementById('fechaPago').value='';
+    document.getElementById('valor').value='';
+    editId=null;
+}
+
+cargarContratos();
+cargarFormasPago();
+cargar();
+
+</script>
+
+</body>
+</html>

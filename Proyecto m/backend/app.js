@@ -65,7 +65,17 @@ app.use('/api/apartamentos', require('./routes/apartamentoRoutes'));
 
 app.use('/api/contratos', require('./routes/contratoRoutes.js'));
 
+app.use('/api/mantenimientos', require('./routes/mantenimientoRoutes'));
 
+app.use('/api/pagomantenimiento', require('./routes/pagoMantenimientoRoutes'));
+
+app.use('/api/perfiles', require('./routes/perfilRoutes'));
+
+app.use('/api/usuarios', require('./routes/usuarioRoutes'));
+
+app.use('/api/informes', require('./routes/informeRoutes'));
+
+app.use('/api/pagocontrato', require('./routes/pagoContratoRoutes'));
 
 app.listen(3000, () => {
 

@@ -25,13 +25,11 @@ body{
     box-shadow:0 2px 10px rgba(0,0,0,0.1);
 }
 
-h1{
-    margin-bottom:20px;
-}
+h1{ margin-bottom:20px; }
 
 input, select{
     padding:10px;
-    width:200px;
+    width:180px;
     margin-right:5px;
     margin-bottom:10px;
 }
@@ -43,25 +41,11 @@ button{
     border-radius:5px;
 }
 
-.guardar{
-    background:#2563eb;
-    color:white;
-}
-
-.buscar{
-    background:#0f172a;
-    color:white;
-}
-
-.editar{
-    background:#16a34a;
-    color:white;
-}
-
-.eliminar{
-    background:#dc2626;
-    color:white;
-}
+.guardar{ background:#2563eb; color:white; }
+.buscar{ background:#0f172a; color:white; }
+.editar{ background:#16a34a; color:white; }
+.eliminar{ background:#dc2626; color:white; }
+.volver{ background:#475569; color:white; margin-bottom:20px; }
 
 table{
     width:100%;
@@ -79,14 +63,13 @@ th{
     color:white;
 }
 
-.top{
-    margin-bottom:20px;
-}
+.top{ margin-bottom:20px; }
 
 </style>
-
 </head>
 <body>
+
+<button class="volver" onclick="window.history.back()">&#8592; Volver al Menú</button>
 
 <div class="container">
 <div class="card">
@@ -99,6 +82,11 @@ th{
     <select id="idTipoPersona">
         <option value="">-- Tipo Persona --</option>
     </select>
+    <input id="fechaNacimiento" type="date" placeholder="Fecha Nacimiento">
+    <input id="domicilio" placeholder="Domicilio">
+    <input id="telefono" placeholder="Teléfono">
+    <input id="correo" placeholder="Correo">
+    <br><br>
     <button class="guardar" onclick="guardar()">Guardar</button>
 </div>
 
@@ -114,6 +102,10 @@ th{
     <th>Nombre</th>
     <th>Apellido</th>
     <th>Tipo</th>
+    <th>Fecha Nac.</th>
+    <th>Domicilio</th>
+    <th>Teléfono</th>
+    <th>Correo</th>
     <th>Acciones</th>
 </tr>
 </thead>
@@ -128,12 +120,12 @@ th{
 const API = '/api/personas';
 let editId = null;
 
-// Cargar tipos persona en el combo
 function cargarTipos(){
     fetch('/api/tipos', {credentials:'include'})
     .then(r=>r.json())
     .then(data=>{
         let sel = document.getElementById('idTipoPersona');
+        sel.innerHTML = '<option value="">-- Tipo Persona --</option>';
         for(let t of data){
             let op = document.createElement('option');
             op.value = t.idTipoPersona;
@@ -156,6 +148,10 @@ function cargar(){
                 <td>${x.nombre}</td>
                 <td>${x.apellido}</td>
                 <td>${x.tipo}</td>
+                <td>${x.fechaNacimiento ? new Date(x.fechaNacimiento).toLocaleDateString() : '-'}</td>
+                <td>${x.domicilio || '-'}</td>
+                <td>${x.telefono || '-'}</td>
+                <td>${x.correo || '-'}</td>
                 <td>
                     <button class="editar" onclick='editar(${JSON.stringify(x)})'>Editar</button>
                     <button class="eliminar" onclick='eliminar(${x.idPersona})'>Eliminar</button>
@@ -170,7 +166,11 @@ function guardar(){
     let data = {
         nombre: document.getElementById('nombre').value,
         apellido: document.getElementById('apellido').value,
-        idTipoPersona: document.getElementById('idTipoPersona').value
+        idTipoPersona: document.getElementById('idTipoPersona').value,
+        fechaNacimiento: document.getElementById('fechaNacimiento').value,
+        domicilio: document.getElementById('domicilio').value,
+        telefono: document.getElementById('telefono').value,
+        correo: document.getElementById('correo').value
     };
 
     if(editId == null){
@@ -195,6 +195,10 @@ function editar(x){
     document.getElementById('nombre').value = x.nombre;
     document.getElementById('apellido').value = x.apellido;
     document.getElementById('idTipoPersona').value = x.idTipoPersona;
+    document.getElementById('fechaNacimiento').value = x.fechaNacimiento ? x.fechaNacimiento.split('T')[0] : '';
+    document.getElementById('domicilio').value = x.domicilio || '';
+    document.getElementById('telefono').value = x.telefono || '';
+    document.getElementById('correo').value = x.correo || '';
 }
 
 function eliminar(id){
@@ -208,11 +212,11 @@ function limpiar(){
     document.getElementById('nombre').value='';
     document.getElementById('apellido').value='';
     document.getElementById('idTipoPersona').value='';
+    document.getElementById('fechaNacimiento').value='';
+    document.getElementById('domicilio').value='';
+    document.getElementById('telefono').value='';
+    document.getElementById('correo').value='';
 }
-
-// También hay que activar la ruta en index.js
-// Asegúrate que en index.js esté:
-// app.use('/api/personas', require('./routes/personaRoutes'));
 
 cargarTipos();
 cargar();

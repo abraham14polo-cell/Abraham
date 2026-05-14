@@ -3,79 +3,88 @@
 <head>
 <meta charset="UTF-8">
 <title>Apartamentos</title>
-
+ 
 <style>
-
+ 
 body{
     font-family:Arial;
     background:#f1f5f9;
     margin:0;
 }
-
+ 
 .container{
     width:90%;
     margin:auto;
     margin-top:40px;
 }
-
+ 
 .card{
     background:white;
     padding:25px;
     border-radius:10px;
     box-shadow:0 2px 10px rgba(0,0,0,0.1);
 }
-
+ 
 h1{ margin-bottom:20px; }
-
+ 
 input, select{
     padding:10px;
     width:180px;
     margin-right:5px;
     margin-bottom:10px;
 }
-
+ 
 button{
     padding:10px 15px;
     border:none;
     cursor:pointer;
     border-radius:5px;
 }
-
+ 
 .guardar{ background:#2563eb; color:white; }
 .buscar{ background:#0f172a; color:white; }
 .editar{ background:#16a34a; color:white; }
 .eliminar{ background:#dc2626; color:white; }
-
+.volver{ background:#475569; color:white; margin-bottom:20px; }
+ 
 table{
     width:100%;
     border-collapse:collapse;
     margin-top:20px;
 }
-
+ 
 th, td{
     border:1px solid #ccc;
     padding:10px;
 }
-
+ 
 th{
     background:#0f172a;
     color:white;
 }
-
+ 
 .top{ margin-bottom:20px; }
-
+ 
 </style>
 </head>
 <body>
-
+ 
 <div class="container">
 <div class="card">
 
+<button class="btn-volver" onclick="window.history.back()">&#8592; Volver al Menú</button>
+ 
 <h1>APARTAMENTOS</h1>
-
+ 
 <div class="top">
     <select id="idPropietario">
         <option value="">-- Propietario --</option>
+    </select>
+    <select id="idPais" onchange="cargarDepartamentos()">
+        <option value="">-- País --</option>
+    </select>
+    <select id="idDepartamento" onchange="cargarCiudades()">
+        <option value="">-- Departamento --</option>
     </select>
     <select id="idCiudad">
         <option value="">-- Ciudad --</option>
@@ -83,18 +92,18 @@ th{
     <input id="direccion" placeholder="Dirección">
     <input id="numeroHabitacion" type="number" placeholder="N° Habitaciones">
     <select id="estado">
-        <option value="1">Disponible</option>
-        <option value="0">Ocupado</option>
+        <option value="1">Ocupado</option>
+        <option value="0">Libre</option>
     </select>
     <input id="pagoMensual" type="number" placeholder="Pago Mensual">
     <button class="guardar" onclick="guardar()">Guardar</button>
 </div>
-
+ 
 <div class="top">
     <input id="buscar" placeholder="Buscar por dirección">
     <button class="buscar" onclick="cargar()">Buscar</button>
 </div>
-
+ 
 <table>
 <thead>
 <tr>
@@ -110,15 +119,15 @@ th{
 </thead>
 <tbody id="datos"></tbody>
 </table>
-
+ 
 </div>
 </div>
-
+ 
 <script>
-
+ 
 const API = '/api/apartamentos';
 let editId = null;
-
+ 
 function cargarPropietarios(){
     fetch('/api/propietarios', {credentials:'include'})
     .then(r=>r.json())
@@ -133,14 +142,53 @@ function cargarPropietarios(){
         }
     });
 }
-
-function cargarCiudades(){
-    fetch('/api/ciudades', {credentials:'include'})
+ 
+function cargarPaises(){
+    fetch('/api/paises', {credentials:'include'})
     .then(r=>r.json())
     .then(data=>{
-        let sel = document.getElementById('idCiudad');
-        sel.innerHTML = '<option value="">-- Ciudad --</option>';
-        for(let c of data){
+        let sel = document.getElementById('idPais');
+        sel.innerHTML = '<option value="">-- País --</option>';
+        for(let p of data){
+            let op = document.createElement('option');
+            op.value = p.idPais;
+            op.text = p.nombre;
+            sel.appendChild(op);
+        }
+    });
+}
+ 
+function cargarDepartamentos(){
+    let idPais = document.getElementById('idPais').value;
+    let sel = document.getElementById('idDepartamento');
+    sel.innerHTML = '<option value="">-- Departamento --</option>';
+    document.getElementById('idCiudad').innerHTML = '<option value="">-- Ciudad --</option>';
+    if(idPais == '') return;
+ 
+    fetch('/api/departamentos?buscar=', {credentials:'include'})
+    .then(r=>r.json())
+    .then(data=>{
+        let filtrados = data.filter(d => d.idPais == idPais);
+        for(let d of filtrados){
+            let op = document.createElement('option');
+            op.value = d.idDepartamento;
+            op.text = d.nombre;
+            sel.appendChild(op);
+        }
+    });
+}
+ 
+function cargarCiudades(){
+    let idDepartamento = document.getElementById('idDepartamento').value;
+    let sel = document.getElementById('idCiudad');
+    sel.innerHTML = '<option value="">-- Ciudad --</option>';
+    if(idDepartamento == '') return;
+ 
+    fetch('/api/ciudades?buscar=', {credentials:'include'})
+    .then(r=>r.json())
+    .then(data=>{
+        let filtrados = data.filter(c => c.idDepartamento == idDepartamento);
+        for(let c of filtrados){
             let op = document.createElement('option');
             op.value = c.idCiudad;
             op.text = c.nombre;
@@ -148,7 +196,7 @@ function cargarCiudades(){
         }
     });
 }
-
+ 
 function cargar(){
     let texto = document.getElementById('buscar').value;
     fetch(API + '?buscar=' + texto, {credentials:'include'})
@@ -161,8 +209,8 @@ function cargar(){
                 <td>${x.idApartamento}</td>
                 <td>${x.direccion}</td>
                 <td>${x.numeroHabitacion}</td>
-                <td>${x.estado == 1 ? 'Disponible' : 'Ocupado'}</td>
-                <td>$${x.pagoMensual}</td>
+                <td>${x.estado == 1 ? 'Ocupado' : 'Libre'}</td>
+                <td>$${Number(x.pagoMensual).toLocaleString('es-CO')}</td>
                 <td>${x.propietario}</td>
                 <td>${x.ciudad}</td>
                 <td>
@@ -174,7 +222,7 @@ function cargar(){
         document.getElementById('datos').innerHTML = html;
     });
 }
-
+ 
 function guardar(){
     let data = {
         idPropietario: document.getElementById('idPropietario').value,
@@ -185,6 +233,11 @@ function guardar(){
         pagoMensual: document.getElementById('pagoMensual').value
     };
 
+    if(!data.idPropietario || !data.idCiudad || !data.direccion || !data.numeroHabitacion || !data.pagoMensual){
+        alert('Complete todos los campos');
+        return;
+    }
+ 
     if(editId == null){
         fetch(API, {
             method:'POST',
@@ -201,38 +254,78 @@ function guardar(){
         }).then(()=>{ editId=null; limpiar(); cargar(); });
     }
 }
-
+ 
 function editar(x){
     editId = x.idApartamento;
     document.getElementById('idPropietario').value = x.idPropietario;
-    document.getElementById('idCiudad').value = x.idCiudad;
+ 
+    fetch('/api/ciudades?buscar=', {credentials:'include'})
+    .then(r=>r.json())
+    .then(ciudades=>{
+        let ciudad = ciudades.find(c => c.idCiudad == x.idCiudad);
+        if(!ciudad) return;
+ 
+        document.getElementById('idPais').value = ciudad.idPais;
+ 
+        fetch('/api/departamentos?buscar=', {credentials:'include'})
+        .then(r=>r.json())
+        .then(deptos=>{
+            let sel = document.getElementById('idDepartamento');
+            sel.innerHTML = '<option value="">-- Departamento --</option>';
+            let filtrados = deptos.filter(d => d.idPais == ciudad.idPais);
+            for(let d of filtrados){
+                let op = document.createElement('option');
+                op.value = d.idDepartamento;
+                op.text = d.nombre;
+                sel.appendChild(op);
+            }
+            sel.value = ciudad.idDepartamento;
+ 
+            let selC = document.getElementById('idCiudad');
+            selC.innerHTML = '<option value="">-- Ciudad --</option>';
+            let ciudadesFiltradas = ciudades.filter(c => c.idDepartamento == ciudad.idDepartamento);
+            for(let c of ciudadesFiltradas){
+                let op = document.createElement('option');
+                op.value = c.idCiudad;
+                op.text = c.nombre;
+                selC.appendChild(op);
+            }
+            selC.value = x.idCiudad;
+        });
+    });
+ 
     document.getElementById('direccion').value = x.direccion;
     document.getElementById('numeroHabitacion').value = x.numeroHabitacion;
-    document.getElementById('estado').value = x.estado;
+   document.getElementById('estado').value = String(x.estado);
     document.getElementById('pagoMensual').value = x.pagoMensual;
 }
-
+ 
 function eliminar(id){
-    fetch(API+'/'+id, {
-        method:'DELETE',
-        credentials:'include'
-    }).then(()=>{ cargar(); });
+    if(confirm('¿Eliminar este apartamento?')){
+        fetch(API+'/'+id, {
+            method:'DELETE',
+            credentials:'include'
+        }).then(()=>{ cargar(); });
+    }
 }
-
+ 
 function limpiar(){
     document.getElementById('idPropietario').value='';
-    document.getElementById('idCiudad').value='';
+    document.getElementById('idPais').value='';
+    document.getElementById('idDepartamento').innerHTML='<option value="">-- Departamento --</option>';
+    document.getElementById('idCiudad').innerHTML='<option value="">-- Ciudad --</option>';
     document.getElementById('direccion').value='';
     document.getElementById('numeroHabitacion').value='';
     document.getElementById('estado').value='1';
     document.getElementById('pagoMensual').value='';
+    editId=null;
 }
-
+ 
 cargarPropietarios();
-cargarCiudades();
+cargarPaises();
 cargar();
-
+ 
 </script>
-
+ 
 </body>
 </html>

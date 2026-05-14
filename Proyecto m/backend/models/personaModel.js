@@ -11,16 +11,16 @@ exports.getAll = (buscar, callback) => {
 
 exports.create = (data, callback) => {
     db.query(
-        'INSERT INTO Persona(nombre,apellido,idTipoPersona) VALUES(?,?,?)',
-        [data.nombre, data.apellido, data.idTipoPersona],
+        'INSERT INTO Persona(nombre, apellido, idTipoPersona, fechaNacimiento, domicilio, telefono, correo) VALUES(?,?,?,?,?,?,?)',
+        [data.nombre, data.apellido, data.idTipoPersona, data.fechaNacimiento || null, data.domicilio || null, data.telefono || null, data.correo || null],
         callback
     );
 };
 
 exports.update = (id, data, callback) => {
     db.query(
-        'UPDATE Persona SET nombre=?, apellido=?, idTipoPersona=? WHERE idPersona=?',
-        [data.nombre, data.apellido, data.idTipoPersona, id],
+        'UPDATE Persona SET nombre=?, apellido=?, idTipoPersona=?, fechaNacimiento=?, domicilio=?, telefono=?, correo=? WHERE idPersona=?',
+        [data.nombre, data.apellido, data.idTipoPersona, data.fechaNacimiento || null, data.domicilio || null, data.telefono || null, data.correo || null, id],
         callback
     );
 };
